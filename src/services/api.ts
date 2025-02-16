@@ -5,17 +5,17 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true
 });
 
-api.interceptors.response.use(
-    (    response: any) => response,
-    (    error: { response: { status: number; }; }) => {
-      if (error.response?.status === 401) {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-      }
-      return Promise.reject(error);
+api.interceptors.request.use((config) => {
+  if (typeof document !== 'undefined') {
+    const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-  );
+  }
+  return config;
+});
 
 export default api;
